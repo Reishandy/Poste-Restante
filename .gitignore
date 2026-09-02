@@ -1,0 +1,108 @@
+# ============================================================
+# General
+# ============================================================
+
+.DS_Store
+Thumbs.db
+
+# Temporary / backup files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+
+# ============================================================
+# IDEs / Editors
+# ============================================================
+
+**/.idea/
+**/.vscode/
+
+# JetBrains
+*.iml
+
+
+# ============================================================
+# macOS
+# ============================================================
+
+.AppleDouble
+.LSOverride
+Icon?
+
+
+# ============================================================
+# iOS / Xcode / Swift
+# ============================================================
+
+# Xcode user-specific data
+**/xcuserdata/
+**/*.xcuserstate
+
+# Xcode build products
+**/DerivedData/
+**/build/
+
+# Swift Package Manager
+**/.build/
+**/.swiftpm/
+
+# Xcode project user data
+**/*.moved-aside
+
+# Playgrounds
+**/.playground/
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/test_output/
+**/fastlane/screenshots/
+
+
+# ============================================================
+# Python
+# ============================================================
+
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Type checking
+.mypy_cache/
+.pyre/
+
+# Ruff
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
