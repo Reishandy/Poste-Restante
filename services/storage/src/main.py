@@ -24,25 +24,6 @@ app = FastAPI(
 )
 
 
-# Custom exception handler to change {detail} to {message} for more unified response
-@app.exception_handler(HTTPException)
-async def custom_http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"message": exc.detail},
-    )
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    error_msg: str = str(exc) if settings.DEV_MODE else "Internal server error"
-
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"message": error_msg},
-    )
-
-
 class HealthCheckResponse(BaseModel):
     service: str = Field(..., description="Service name.", examples=[settings.APP_NAME])
     version: str = Field(..., description="Service version.", examples=[settings.APP_VERSION])
@@ -70,7 +51,8 @@ class HealthCheckResponse(BaseModel):
 async def health_check_endpoint(response: Response):
     """
     Health check endpoint.
-    Returns 200 when all systems are operational, or 503 if the database is down.
+
+    :return: 200 when all systems are operational, or 503 if the database is down.
     """
     try:
         await database.client.admin.command("ping")
