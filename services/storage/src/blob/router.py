@@ -47,6 +47,7 @@ async def get_blob(
 
 @router.put(
     "/{blob_id}",
+    status_code=status.HTTP_201_CREATED,
     summary="Store new blob",
     description="Endpoint to store a new blob by id",
     response_model=Response,
