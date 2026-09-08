@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from starlette import status
 
 from src.blob import service
-from src.blob.schemas import BlobResponse, BlobStore, BadRequest
+from src.blob.schemas import BadRequest, BlobResponse, BlobStore
 from src.database import get_database
 from src.schemas import Response
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/blob", tags=["Blob Storage"])
 @router.get(
     "/{blob_id}",
     summary="Get a blob",
-    description="Endpoint to get a blob given its id",
+    description="Endpoint to get a blob given its id and ownership token",
     response_model=BlobResponse,
     responses={
         status.HTTP_200_OK: {
@@ -23,15 +23,19 @@ router = APIRouter(prefix="/blob", tags=["Blob Storage"])
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
             "description": "Bad Request",
-        }
+        },
     },
 )
 async def get_blob(
         blob_id: str,
-        db: AsyncIOMotorDatabase = Depends(get_database)
+        x_ownership_token: str = Header(
+            ...,
+            alias="X-Ownership-Token",
+            description="Proof of ownership token",
+        ),
+        db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> BlobResponse:
-    # TODO: Return 400 for both id not found or failed auth
-    result = await service.get_blob(db, blob_id)
+    result = await service.get_blob(db, blob_id, x_ownership_token)
 
     if not result:
         raise HTTPException(
@@ -39,10 +43,7 @@ async def get_blob(
             detail="bad request",
         )
 
-    return BlobResponse(
-        detail="ok",
-        content=result
-    )
+    return BlobResponse(detail="ok", content=result)
 
 
 @router.put(
@@ -59,21 +60,21 @@ async def get_blob(
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
             "description": "bad request",
-        }
+        },
     },
 )
 async def store_blob(
         blob_id: str,
         payload: BlobStore,
-        db: AsyncIOMotorDatabase = Depends(get_database)
+        db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> Response:
-    # TODO: Durable write?
-    success = await service.store_blob(db, blob_id, payload.content)
+    success = await service.store_blob(
+        db, blob_id, payload.content, payload.token
+    )
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="bad request"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="bad request"
         )
 
     return Response(detail="ok")
@@ -92,20 +93,23 @@ async def store_blob(
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
             "description": "bad request",
-        }
+        },
     },
 )
 async def delete_blob(
         blob_id: str,
-        db: AsyncIOMotorDatabase = Depends(get_database)
+        x_ownership_token: str = Header(
+            ...,
+            alias="X-Ownership-Token",
+            description="Proof of ownership token",
+        ),
+        db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> Response:
-    # TODO: Return 400 for both id not found or failed auth
-    success = await service.delete_blob(db, blob_id)
+    success = await service.delete_blob(db, blob_id, x_ownership_token)
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="bad request"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="bad request"
         )
 
     return Response(detail="ok")
