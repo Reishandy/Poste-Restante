@@ -14,6 +14,7 @@ from src.blob.router import router as blob_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await database.connect()
+    await database.create_indexes()
     yield
     await database.close()
 
@@ -25,7 +26,7 @@ app = FastAPI(
     responses={
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "model": ErrorResponse,
-            "description": "Internal Server Error",
+            "description": "internal server error",
         },
     },
 )
@@ -64,7 +65,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         },
     },
 )
-async def health_check_endpoint(response: Response):
+async def health_check_endpoint(response: Response) -> HealthCheckResponse:
     try:
         await database.client.admin.command("ping")
         db_status = "ok"
