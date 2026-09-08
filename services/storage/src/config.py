@@ -14,6 +14,7 @@ class Config(BaseSettings):
     MONGO_DB_NAME: str = Field("poste_restante_storage_db", description="Database name")
 
     DEV_MODE: bool = Field(False, description="Development mode flag")
+    BLOB_EXPIRY_SECONDS: int = Field(7_776_000, description="Expiry in seconds for blob storage") # Defaults to 90 Days
 
 
 settings = Config()
