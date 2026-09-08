@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
+from pymongo import WriteConcern
 from pymongo.errors import DuplicateKeyError
 
 COLLECTION_NAME = "blobs"
@@ -27,14 +28,18 @@ async def get_blob(db: AsyncIOMotorDatabase, blob_id: str) -> str | None:
 
 
 async def store_blob(db: AsyncIOMotorDatabase, blob_id: str, content: str) -> bool:
-    # TODO: Durable write?
     try:
-        await _collection(db).insert_one({
+        collection = _collection(db).with_options(
+            write_concern=WriteConcern(w="majority", j=True)
+        )
+
+        result = await collection.insert_one({
             "blob_id": blob_id,
             "content": content,
-            "created_at": datetime.now(timezone.utc),
+            "created_at": datetime.now(timezone.utc)
         })
-        return True
+
+        return result.acknowledged
     except DuplicateKeyError:
         return False
 
