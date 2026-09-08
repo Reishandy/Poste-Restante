@@ -7,7 +7,11 @@ from src.config import settings
 
 class Response(BaseModel):
     """Base response model for consistency"""
-    detail: str = Field(..., description="The response detail", examples=["ok"])
+    detail: str = Field(
+        ...,
+        description="The response detail",
+        examples=["ok"]
+    )
 
 
 class ErrorResponse(Response):
