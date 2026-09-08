@@ -1,14 +1,15 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from motor.motor_asyncio import AsyncIOMotorDatabase
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-from src.config import settings
-from src.database import database
-from src.schemas import ErrorResponse, HealthCheckResponse, HealthCheckSuccessResponse, HealthCheckDegradedResponse
 from src.blob.router import router as blob_router
+from src.config import settings
+from src.database import database, get_database
+from src.schemas import ErrorResponse, HealthCheckResponse, HealthCheckSuccessResponse, HealthCheckDegradedResponse
 
 
 @asynccontextmanager
@@ -31,6 +32,7 @@ app = FastAPI(
     },
 )
 
+
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
@@ -47,6 +49,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"message": error_msg},
     )
+
 
 @app.get(
     "/",
@@ -65,9 +68,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         },
     },
 )
-async def health_check_endpoint(response: Response) -> HealthCheckResponse:
+async def health_check_endpoint(
+        response: Response,
+        db: AsyncIOMotorDatabase = Depends(get_database)
+) -> HealthCheckResponse:
     try:
-        await database.client.admin.command("ping")
+        await db.client.admin.command("ping")
         db_status = "ok"
         server_status = "ok"
     except Exception:
@@ -81,5 +87,6 @@ async def health_check_endpoint(response: Response) -> HealthCheckResponse:
         version=settings.APP_VERSION,
         database=db_status,
     )
+
 
 app.include_router(blob_router)
