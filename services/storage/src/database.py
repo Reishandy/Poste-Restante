@@ -24,10 +24,12 @@ class Database:
         Creates necessary indexes for the collections.
         Should be run on application startup.
         """
+        collection = database.client[settings.MONGO_DB_NAME]["blobs"]
 
-        # TODO: Create other indexes
-        await database.client[settings.MONGO_DB_NAME]["blobs"].create_index(
-            "blob_id", unique=True
+        await collection.create_index("blob_id", unique=True)
+        await collection.create_index(
+            "created_at",
+            expireAfterSeconds=settings.BLOB_EXPIRY_SECONDS,
         )
 
 
