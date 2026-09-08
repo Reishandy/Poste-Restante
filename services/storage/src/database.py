@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-from config import settings
+from src.config import settings
 
 
 class Database:
@@ -12,11 +12,23 @@ class Database:
     async def connect(self) -> None:
         self.client = AsyncIOMotorClient(settings.MONGO_URI)
         self.db = self.client[settings.MONGO_DB_NAME]
+
         await self.client.admin.command("ping")
 
     async def close(self) -> None:
         if self.client is not None:
             self.client.close()
+
+    async def create_indexes(self):
+        """
+        Creates necessary indexes for the collections.
+        Should be run on application startup.
+        """
+
+        # TODO: Create other indexes
+        await database.client[settings.MONGO_DB_NAME]["blobs"].create_index(
+            "blob_id", unique=True
+        )
 
 
 database = Database()
