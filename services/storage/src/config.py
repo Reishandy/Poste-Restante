@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -6,11 +7,13 @@ class Config(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    APP_NAME: str = "Poste Restante Storage Service"
-    APP_VERSION: str = "1.0.0"
+    APP_NAME: str = Field("Poste Restante Storage Service", description="Name of the server instance")
+    APP_VERSION: str = Field("1.0.0", description="Version of the server")
 
-    MONGO_URI: str = "mongodb://localhost:27017"
-    MONGO_DB_NAME: str = "poste_restante_storage_db"
+    MONGO_URI: str = Field("mongodb://localhost:27017", description="MongoDB URI")
+    MONGO_DB_NAME: str = Field("poste_restante_storage_db", description="Database name")
+
+    DEV_MODE: bool = Field(False, description="Development mode flag")
 
 
 settings = Config()

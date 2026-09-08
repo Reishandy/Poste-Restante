@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-from config import settings
+from src.config import settings
 
 
 class Database:

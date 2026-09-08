@@ -1,13 +1,14 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-from config import settings
-from database import database
+from src.config import settings
+from src.database import database
+from src.schemas import ErrorResponse, HealthCheckResponse, HealthCheckSuccessResponse, HealthCheckDegradedResponse
+from src.blob.router import router as blob_router
 
 
 @asynccontextmanager
@@ -21,15 +22,30 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     lifespan=lifespan,
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorResponse,
+            "description": "Internal Server Error",
+        },
+    },
 )
 
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": exc.detail},
+    )
 
-class HealthCheckResponse(BaseModel):
-    service: str = Field(..., description="Service name.", examples=[settings.APP_NAME])
-    version: str = Field(..., description="Service version.", examples=[settings.APP_VERSION])
-    status: str = Field(..., description="Service status.", examples=["ok"])
-    database: str = Field(..., description="Database status.", examples=["ok"])
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg: str = str(exc) if settings.DEV_MODE else "Internal server error"
+
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": error_msg},
+    )
 
 @app.get(
     "/",
@@ -39,21 +55,16 @@ class HealthCheckResponse(BaseModel):
     response_model=HealthCheckResponse,
     responses={
         status.HTTP_200_OK: {
-            "model": HealthCheckResponse,
+            "model": HealthCheckSuccessResponse,
             "description": "Service is operational",
         },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
-            "model": HealthCheckResponse,
+            "model": HealthCheckDegradedResponse,
             "description": "Database is unreachable",
         },
     },
 )
 async def health_check_endpoint(response: Response):
-    """
-    Health check endpoint.
-
-    :return: 200 when all systems are operational, or 503 if the database is down.
-    """
     try:
         await database.client.admin.command("ping")
         db_status = "ok"
@@ -64,8 +75,10 @@ async def health_check_endpoint(response: Response):
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
 
     return HealthCheckResponse(
+        detail=server_status,
         service=settings.APP_NAME,
         version=settings.APP_VERSION,
-        status=server_status,
         database=db_status,
     )
+
+app.include_router(blob_router)
