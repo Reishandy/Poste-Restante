@@ -9,4 +9,4 @@ services:
       DEV_MODE: ${DEV_MODE:-false}
       TARGET_GATEWAY_URL: ${TARGET_GATEWAY_URL:-http://storage:8000/ohttp}
     ports:
-      - "${APP_PORT:-8001}:8000"
+      - "${APP_PORT:-8000}:8000"
