@@ -34,6 +34,11 @@ class HealthCheckResponse(Response):
         examples=[settings.APP_VERSION],
     )
     database: str = Field(..., description="Database status", examples=["ok"])
+    hpke_public_key: str = Field(
+        ...,
+        description="Base64-encoded HPKE public key for this service)",
+        examples=["3z5V9k2t1Q...base64..."],
+    )
 
 
 class HealthCheckSuccessResponse(HealthCheckResponse):

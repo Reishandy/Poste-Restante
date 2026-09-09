@@ -1,0 +1,39 @@
+name: poste-restante
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: storage_app
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - internal
+
+  storage:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      APP_NAME: ${APP_NAME:-poste-restante-storage}
+      DEV_MODE: ${DEV_MODE:-false}
+      BLOB_EXPIRY_SECONDS: ${BLOB_EXPIRY_SECONDS:-7776000}
+      MONGO_URI: mongodb://storage_app:${MONGO_PASSWORD}@mongo:27017
+      MONGO_DB_NAME: poste_restante_storage_db
+      HPKE_KEY_DIR: /data/keys
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - hpke_keys:/data/keys
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  mongo_data:
+  hpke_keys:

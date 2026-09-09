@@ -1,7 +1,9 @@
+import base64
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from src.hpke.keys import SUITE, load_or_generate_node_keys
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -16,6 +18,12 @@ from src.schemas import ErrorResponse, HealthCheckResponse, HealthCheckSuccessRe
 async def lifespan(app: FastAPI):
     await database.connect()
     await database.create_indexes()
+
+    priv_bytes, pub_bytes = load_or_generate_node_keys()
+    app.state.hpke_private_key = SUITE.kem.deserialize_private_key(priv_bytes)
+    app.state.hpke_public_key = SUITE.kem.deserialize_public_key(pub_bytes)
+    app.state.hpke_public_key_b64 = base64.b64encode(pub_bytes).decode()
+
     yield
     await database.close()
 
@@ -69,8 +77,9 @@ async def global_exception_handler(request: Request, exc: Exception):
     },
 )
 async def health_check_endpoint(
+        request: Request,
         response: Response,
-        db: AsyncIOMotorDatabase = Depends(get_database)
+        db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> HealthCheckResponse:
     try:
         await db.client.admin.command("ping")
@@ -86,6 +95,7 @@ async def health_check_endpoint(
         service=settings.APP_NAME,
         version=settings.APP_VERSION,
         database=db_status,
+        hpke_public_key=request.app.state.hpke_public_key_b64,
     )
 
 
