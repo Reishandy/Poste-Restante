@@ -1,11 +1,21 @@
 import secrets
 import struct
 
-from pyhpke import ContextInterface
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM, ChaCha20Poly1305
+from pyhpke import AEADId, ContextInterface
 
 from src.ohttp.keys import SUITE
 
 OHTTP_KEY_ID = 1
+
+
+def _get_aead_cipher(aead_id: AEADId, key: bytes):
+    """Instantiates a raw AEAD primitive from cryptography for response encap/decap."""
+    if aead_id in (AEADId.AES128_GCM, AEADId.AES256_GCM):
+        return AESGCM(key)
+    elif aead_id == AEADId.CHACHA20_POLY1305:
+        return ChaCha20Poly1305(key)
+    raise ValueError(f"Unsupported AEAD algorithm: {aead_id}")
 
 
 def decapsulate_request(
@@ -55,5 +65,6 @@ def encapsulate_response(
     aead_key = SUITE.kdf.expand(prk, b"message/bhttp response\x00key", nk)
     aead_nonce = SUITE.kdf.expand(prk, b"message/bhttp response\x00nonce", nn)
 
-    ct = SUITE.aead.seal(aead_key, aead_nonce, b"", bhttp_response)
+    cipher = _get_aead_cipher(SUITE.aead.id, aead_key)
+    ct = cipher.encrypt(aead_nonce, bhttp_response, b"")
     return response_nonce + ct
