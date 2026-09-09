@@ -18,5 +18,8 @@ class Config(BaseSettings):
 
     HPKE_KEY_DIR: str = Field("./data/keys", description="Directory holding this node's HPKE keypair.")
 
+    POW_DIFFICULTY_BITS: int = Field(18, description="Leading zero bits required on mailbox creation") # ~262k iterations (~100ms on a modern phone)
+    POW_EPOCH_WINDOW_SECONDS: int = Field(600, description="Window duration in seconds for epoch freshness") # 10 minute windows
+
 
 settings = Config()
