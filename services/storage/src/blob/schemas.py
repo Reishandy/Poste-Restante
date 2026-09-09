@@ -27,5 +27,5 @@ class BadRequest(Response):
     detail: str = Field(
         default="Bad Request",
         description="The error detail",
-        examples=["Bad Request"],
+        examples=["bad request"],
     )

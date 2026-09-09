@@ -18,7 +18,7 @@ class ErrorResponse(Response):
     detail: str = Field(
         default="Internal server error",
         description="The error detail",
-        examples=["Internal server error"],
+        examples=["Internal Server Error"],
     )
 
 
@@ -34,6 +34,11 @@ class HealthCheckResponse(Response):
         examples=[settings.APP_VERSION],
     )
     database: str = Field(..., description="Database status", examples=["ok"])
+    hpke_public_key: str = Field(
+        ...,
+        description="Base64-encoded HPKE public key for this service)",
+        examples=["3z5V9k2t1Q...base64..."],
+    )
 
 
 class HealthCheckSuccessResponse(HealthCheckResponse):
@@ -50,13 +55,13 @@ class HealthCheckSuccessResponse(HealthCheckResponse):
 
 
 class HealthCheckDegradedResponse(HealthCheckResponse):
-    detail: Literal["degraded"] = Field(
-        default="degraded",
+    detail: Literal["Degraded"] = Field(
+        default="Degraded",
         description="The response detail",
-        examples=["degraded"],
+        examples=["Degraded"],
     )
-    database: Literal["unreachable"] = Field(
-        default="unreachable",
+    database: Literal["Unreachable"] = Field(
+        default="Unreachable",
         description="Database status",
-        examples=["unreachable"],
+        examples=["Unreachable"],
     )

@@ -3,11 +3,19 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from starlette import status
 
 from src.blob import service
+from src.blob.dependency import verify_internal_dispatch
 from src.blob.schemas import BadRequest, BlobResponse, BlobStore
 from src.database import get_database
 from src.schemas import Response
 
-router = APIRouter(prefix="/blob", tags=["Blob Storage"])
+router = APIRouter(
+    prefix="/blob",
+    tags=["Blob Storage (Encapsulated)"],
+    responses={
+        403: {"description": "Returned if called outside an OHTTP encapsulation"}
+    },
+    dependencies=[Depends(verify_internal_dispatch)],
+)
 
 
 @router.get(
@@ -40,7 +48,7 @@ async def get_blob(
     if not result:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="bad request",
+            detail="Bad Request",
         )
 
     return BlobResponse(detail="ok", content=result)
@@ -59,7 +67,7 @@ async def get_blob(
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
-            "description": "bad request",
+            "description": "Bad request",
         },
     },
 )
@@ -74,7 +82,7 @@ async def store_blob(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="bad request"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Bad Request"
         )
 
     return Response(detail="ok")
@@ -92,7 +100,7 @@ async def store_blob(
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
-            "description": "bad request",
+            "description": "Bad Request",
         },
     },
 )
@@ -109,7 +117,7 @@ async def delete_blob(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="bad request"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Bad Request"
         )
 
     return Response(detail="ok")
