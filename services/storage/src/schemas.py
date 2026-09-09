@@ -23,10 +23,15 @@ class ErrorResponse(Response):
 
 
 class HealthCheckResponse(Response):
+    app: str = Field(
+        default="Poste Restante Storage Service",
+        description="Application name",
+        examples=["Poste Restante Storage Service"],
+    )
     service: str = Field(
         default=settings.APP_NAME,
-        description="Service name",
-        examples=[settings.APP_NAME],
+        description="Service type",
+        examples=["storage"],
     )
     version: str = Field(
         default=settings.APP_VERSION,

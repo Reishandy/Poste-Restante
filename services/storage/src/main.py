@@ -97,7 +97,8 @@ async def health_check_endpoint(
 
     return HealthCheckResponse(
         detail=server_status,
-        service=settings.APP_NAME,
+        app=settings.APP_NAME,
+        service="storage",
         version=settings.APP_VERSION,
         database=db_status,
         hpke_public_key=request.app.state.hpke_public_key_b64,
