@@ -10,15 +10,32 @@ router = APIRouter(tags=["OHTTP Gateway"])
 
 @router.post(
     "/ohttp",
-    summary="OHTTP Encapsulated Gateway",
-    description="Accepts RFC 9458 encapsulated binary requests and returns encapsulated responses.",
+    tags=["OHTTP Gateway"],
+    summary="Oblivious HTTP Gateway (RFC 9458)",
+    description="""
+    Processes an RFC 9458 encapsulated HTTP message.
+    
+    ### Ciphersuite
+    * **Key ID:** `1`
+    * **KEM:** `DHKEM(X25519, HKDF-SHA256)` (`0x0020`)
+    * **KDF:** `HKDF-SHA256` (`0x0001`)
+    * **AEAD:** `AES-256-GCM` (`0x0002`)
+    
+    ### Wire Protocol
+    1. Outer payload: `header (7 bytes) || enc (32 bytes) || ciphertext`.
+    2. Decapsulated body is parsed as a Binary HTTP request (RFC 9292).
+    3. The request is dispatched internally to `/mailbox/{id}` via in-memory loopback.
+    4. The inner response is re-encoded as BHTTP and sealed with HPKE response encapsulation.
+    
+    *Note:* An outer status `200 OK` indicates successful envelope decapsulation; inner application errors (such as `400 Bad Request`) are encapsulated inside the returning `message/ohttp-res` payload.
+    """,
     responses={
         status.HTTP_200_OK: {
             "content": {"message/ohttp-res": {}},
-            "description": "Encapsulated OHTTP response",
+            "description": "Successful roundtrip; body contains HPKE-sealed BHTTP response.",
         },
         status.HTTP_400_BAD_REQUEST: {
-            "description": "Outer HPKE decapsulation failure"
+            "description": "Malformed envelope, unparseable BHTTP, or mismatched ciphersuite parameters.",
         },
     },
 )

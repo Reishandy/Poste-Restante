@@ -20,8 +20,13 @@ router = APIRouter(
 
 @router.get(
     "/{mailbox_id}",
-    summary="Get a mailbox",
-    description="Endpoint to get a mailbox given its id and ownership token",
+    summary="Retrieve Mailbox",
+    description="""
+    Fetches ciphertext using the bearer `X-Ownership-Token`.
+
+    * Does not delete content upon reading.
+    * Deliberately returns identical `400 Bad Request` responses for both invalid tokens and non-existent/expired IDs to prevent key enumeration.
+    """,
     response_model=MailboxResponse,
     responses={
         status.HTTP_200_OK: {
@@ -56,9 +61,15 @@ async def get_mailbox(
 
 @router.put(
     "/{mailbox_id}",
+    summary="Create Mailbox (Write-Once)",
+    description="""
+    Stores an encrypted payload under a unique `mailbox_id`.
+    
+    * Requires valid `X-PoW-Nonce` matching `sha256(epoch:mailbox_id:nonce)`.
+    * Duplicate writes to an existing `mailbox_id` return `400 Bad Request`.
+    * The token provided in the body is required for subsequent read/delete operations.
+    """,
     status_code=status.HTTP_201_CREATED,
-    summary="Store new mailbox",
-    description="Endpoint to store a new mailbox by id",
     response_model=Response,
     dependencies=[Depends(verify_pow)],
     responses={
@@ -91,8 +102,13 @@ async def store_mailbox(
 
 @router.delete(
     "/{mailbox_id}",
-    summary="Delete a mailbox",
-    description="Endpoint to delete a mailbox",
+    summary="Purge Mailbox",
+    description="""
+    Permanently removes a mailbox record from storage.
+
+    * Requires valid `X-Ownership-Token`.
+    * Idempotent: returns `200 OK` whether the mailbox existed or was already removed.
+    """,
     response_model=Response,
     responses={
         status.HTTP_200_OK: {
