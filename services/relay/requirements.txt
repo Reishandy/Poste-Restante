@@ -6,3 +6,5 @@ httpx==0.28.1
 pytest==9.1.1
 pytest-asyncio==1.4.0
 asgi-lifespan==2.1.0
+pyhpke==0.6.5
+cryptography==50.0.1

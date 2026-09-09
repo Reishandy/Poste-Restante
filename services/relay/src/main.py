@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import FastAPI, HTTPException
+from src.relay.router import router as relay_router
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -11,9 +13,11 @@ from src.schemas import HealthCheckResponse
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Setup connection pools or HTTP client sessions here once proxy logic is ready
-    yield
-    # Cleanup connection pools on shutdown
+    async with httpx.AsyncClient(
+            timeout=httpx.Timeout(settings.REQUEST_TIMEOUT_SECONDS, connect=5.0)
+    ) as client:
+        app.state.http_client = client
+        yield
 
 
 tags_metadata = [
@@ -74,3 +78,6 @@ async def health_check_endpoint(response: Response) -> HealthCheckResponse:
         service="relay",
         version=settings.APP_VERSION,
     )
+
+
+app.include_router(relay_router)

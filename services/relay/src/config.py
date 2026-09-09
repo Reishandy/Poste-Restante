@@ -14,5 +14,10 @@ class Config(BaseSettings):
     APP_VERSION: str = Field("1.0.0", description="Version of the server")
     DEV_MODE: bool = Field(False, description="Development mode flag")
 
+    REQUEST_TIMEOUT_SECONDS: float = Field(
+        15.0,
+        description="Connection and read timeout when forwarding to storage",
+    )
+
 
 settings = Config()
