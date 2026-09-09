@@ -8,12 +8,12 @@ from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-from src.mailbox.router import router as mailbox_router
 from src.config import settings
 from src.database import database, get_database
+from src.mailbox.router import router as mailbox_router
 from src.ohttp.keys import SUITE, load_or_generate_node_keys
 from src.ohttp.router import router as ohttp_router
-from src.schemas import ErrorResponse, HealthCheckResponse, HealthCheckSuccessResponse, HealthCheckDegradedResponse
+from src.schemas import HealthCheckResponse, HealthCheckSuccessResponse, HealthCheckDegradedResponse
 
 
 @asynccontextmanager
@@ -32,16 +32,34 @@ async def lifespan(app: FastAPI):
     await database.close()
 
 
-app = FastAPI(
-    title="Poste Restante Storage Service",
-    version=settings.APP_VERSION,
-    lifespan=lifespan,
-    responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "model": ErrorResponse,
-            "description": "Internal Server Error",
-        },
+tags_metadata = [
+    {
+        "name": "Service Discovery",
+        "description": "Public health status and cryptographic identity discovery.",
     },
+    {
+        "name": "OHTTP Gateway",
+        "description": (
+            "RFC 9458 encapsulated gateway. All mailbox operations (read/write/delete) "
+            "must pass through `/ohttp` sealed against the node's HPKE public key."
+        ),
+    },
+    {
+        "name": "Mailbox Storage (Encapsulated)",
+        "description": (
+            "Inner endpoints executed via ASGI loopback. Direct external HTTP access "
+            "returns `403 Forbidden` these endpoints only process requests arriving "
+            "inside a decapsulated Binary HTTP (RFC 9292) envelope."
+        ),
+    },
+]
+
+app = FastAPI(
+    title="Poste Restante — Storage Service",
+    description="A stateless, blind key-value store holding encrypted mailbox payloads.",
+    version=settings.APP_VERSION,
+    openapi_tags=tags_metadata,
+    lifespan=lifespan,
     swagger_ui_parameters={"supportedSubmitMethods": []},
 )
 
@@ -66,7 +84,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 @app.get(
     "/",
-    tags=[f"App: {settings.APP_NAME}"],
+    tags=["Service Discovery"],
     summary="Health Check",
     description="Endpoint to check the health status of the Server.",
     response_model=HealthCheckResponse,

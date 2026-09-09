@@ -67,7 +67,11 @@ def verify_pow(
         x_pow_nonce: str = Header(
             ...,
             alias="X-PoW-Nonce",
-            description="Proof of work nonce meeting difficulty requirement",
+            description=(
+                    "Mined nonce such that `sha256(epoch:mailbox_id:nonce)` contains at least "
+                    f"{settings.POW_DIFFICULTY_BITS} leading zero bits. Verified against current epoch window ({settings.POW_EPOCH_WINDOW_SECONDS/60}m) ± 1 epoch."
+            ),
+            examples=["429184"],
         ),
 ) -> None:
     """
