@@ -4,13 +4,14 @@ from starlette import status
 
 from src.config import settings
 from src.relay import service
-from src.relay.dependencies import get_http_client
+from src.relay.dependencies import check_rate_limit, get_http_client
 
 router = APIRouter(tags=["Relay"])
 
 
 @router.post(
     "/relay",
+    dependencies=[Depends(check_rate_limit)],
     summary="Oblivious HTTP Relay (RFC 9458)",
     description="""
     Blindly forwards an RFC 9458 encapsulated binary request (`message/ohttp-req`)
@@ -28,6 +29,9 @@ router = APIRouter(tags=["Relay"])
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE: {
             "description": "Expected Content-Type: message/ohttp-req.",
         },
+        status.HTTP_429_TOO_MANY_REQUESTS: {
+            "description": "Per-IP rate limit exceeded.",
+        },
         status.HTTP_502_BAD_GATEWAY: {
             "description": "Upstream gateway unreachable or connection refused.",
         },
@@ -36,12 +40,16 @@ router = APIRouter(tags=["Relay"])
         },
     },
 )
-@router.post("/ohttp", include_in_schema=False)
+@router.post(
+    "/ohttp",
+    include_in_schema=False,
+    dependencies=[Depends(check_rate_limit)],
+)
 async def relay_request(
-        request: Request,
-        target: str | None = Query(default=None, description="Upstream gateway URI"),
-        target_uri: str | None = Header(default=None, alias="Target-URI"),
-        http_client: httpx.AsyncClient = Depends(get_http_client),
+    request: Request,
+    target: str | None = Query(default=None, description="Upstream gateway URI"),
+    target_uri: str | None = Header(default=None, alias="Target-URI"),
+    http_client: httpx.AsyncClient = Depends(get_http_client),
 ) -> Response:
     # Verify RFC 9458 Media Type
     content_type = request.headers.get("content-type", "").split(";")[0].strip()

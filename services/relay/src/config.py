@@ -19,5 +19,14 @@ class Config(BaseSettings):
         description="Connection and read timeout when forwarding to storage",
     )
 
+    RATE_LIMIT_REQUESTS: int = Field(
+        60,
+        description="Maximum requests permitted per IP within the window",
+    )
+    RATE_LIMIT_WINDOW_SECONDS: int = Field(
+        60,
+        description="Sliding window duration in seconds",
+    )
+
 
 settings = Config()
