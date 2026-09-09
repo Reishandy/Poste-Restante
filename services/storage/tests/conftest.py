@@ -19,10 +19,11 @@ async def test_app():
 
 @pytest.fixture
 async def client(test_app):
-    """Async HTTP client scoped to this FastAPI app."""
+    """Async HTTP client scoped to this FastAPI app with internal bypass enabled."""
     async with AsyncClient(
             transport=ASGITransport(app=test_app),
-            base_url="http://test"
+            base_url="http://test",
+            headers={"X-Internal-Dispatch": test_app.state.internal_dispatch_token},
     ) as ac:
         yield ac
 

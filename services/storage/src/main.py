@@ -1,9 +1,9 @@
 import base64
+import secrets
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from src.hpke.keys import SUITE, load_or_generate_node_keys
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -11,11 +11,14 @@ from starlette.responses import JSONResponse, Response
 from src.blob.router import router as blob_router
 from src.config import settings
 from src.database import database, get_database
+from src.hpke.keys import SUITE, load_or_generate_node_keys
 from src.schemas import ErrorResponse, HealthCheckResponse, HealthCheckSuccessResponse, HealthCheckDegradedResponse
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.state.internal_dispatch_token = secrets.token_hex(32)
+
     await database.connect()
     await database.create_indexes()
 
@@ -29,15 +32,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title=settings.APP_NAME,
+    title="Poste Restante Storage Service",
     version=settings.APP_VERSION,
     lifespan=lifespan,
     responses={
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "model": ErrorResponse,
-            "description": "internal server error",
+            "description": "Internal Server Error",
         },
     },
+    swagger_ui_parameters={"supportedSubmitMethods": []},
 )
 
 
@@ -45,7 +49,7 @@ app = FastAPI(
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={"message": exc.detail},
+        content={"detail": exc.detail},
     )
 
 
@@ -55,13 +59,13 @@ async def global_exception_handler(request: Request, exc: Exception):
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"message": error_msg},
+        content={"detail": error_msg},
     )
 
 
 @app.get(
     "/",
-    tags=["Root"],
+    tags=[f"App: {settings.APP_NAME}"],
     summary="Health Check",
     description="Endpoint to check the health status of the Server.",
     response_model=HealthCheckResponse,
@@ -86,8 +90,8 @@ async def health_check_endpoint(
         db_status = "ok"
         server_status = "ok"
     except Exception:
-        db_status = "unreachable"
-        server_status = "degraded"
+        db_status = "Unreachable"
+        server_status = "Degraded"
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
 
     return HealthCheckResponse(

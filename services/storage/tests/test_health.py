@@ -34,8 +34,8 @@ async def test_health_check_degraded_when_ping_fails(client):
         response = await client.get("/")
         assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
         payload = response.json()
-        assert payload["database"] == "unreachable"
-        assert payload["detail"] == "degraded"
+        assert payload["database"] == "Unreachable"
+        assert payload["detail"] == "Degraded"
     finally:
         app.dependency_overrides.clear()
 
