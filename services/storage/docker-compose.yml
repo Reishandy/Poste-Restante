@@ -20,7 +20,7 @@ services:
     environment:
       APP_NAME: ${APP_NAME:-poste-restante-storage}
       DEV_MODE: ${DEV_MODE:-false}
-      BLOB_EXPIRY_SECONDS: ${BLOB_EXPIRY_SECONDS:-7776000}
+      MAILBOX_EXPIRY_SECONDS: ${MAILBOX_EXPIRY_SECONDS:-7776000}
       MONGO_URI: mongodb://storage_app:${MONGO_PASSWORD}@mongo:27017
       MONGO_DB_NAME: poste_restante_storage_db
       HPKE_KEY_DIR: /data/keys

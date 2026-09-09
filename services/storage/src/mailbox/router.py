@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from starlette import status
 
-from src.blob import service
-from src.blob.dependency import verify_internal_dispatch
-from src.blob.schemas import BadRequest, BlobResponse, BlobStore
+from src.mailbox import service
+from src.mailbox.dependency import verify_internal_dispatch
+from src.mailbox.schemas import BadRequest, MailboxResponse, MailboxStore
 from src.database import get_database
 from src.schemas import Response
 
 router = APIRouter(
-    prefix="/blob",
-    tags=["Blob Storage (Encapsulated)"],
+    prefix="/mailbox",
+    tags=["Mailbox Storage (Encapsulated)"],
     responses={
         403: {"description": "Returned if called outside an OHTTP encapsulation"}
     },
@@ -19,14 +19,14 @@ router = APIRouter(
 
 
 @router.get(
-    "/{blob_id}",
-    summary="Get a blob",
-    description="Endpoint to get a blob given its id and ownership token",
-    response_model=BlobResponse,
+    "/{mailbox_id}",
+    summary="Get a mailbox",
+    description="Endpoint to get a mailbox given its id and ownership token",
+    response_model=MailboxResponse,
     responses={
         status.HTTP_200_OK: {
-            "model": BlobResponse,
-            "description": "Return a blob",
+            "model": MailboxResponse,
+            "description": "Return a mailbox",
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
@@ -34,16 +34,16 @@ router = APIRouter(
         },
     },
 )
-async def get_blob(
-        blob_id: str,
+async def get_mailbox(
+        mailbox_id: str,
         x_ownership_token: str = Header(
             ...,
             alias="X-Ownership-Token",
             description="Proof of ownership token",
         ),
         db: AsyncIOMotorDatabase = Depends(get_database),
-) -> BlobResponse:
-    result = await service.get_blob(db, blob_id, x_ownership_token)
+) -> MailboxResponse:
+    result = await service.get_mailbox(db, mailbox_id, x_ownership_token)
 
     if not result:
         raise HTTPException(
@@ -51,19 +51,19 @@ async def get_blob(
             detail="Bad Request",
         )
 
-    return BlobResponse(detail="ok", content=result)
+    return MailboxResponse(detail="ok", content=result)
 
 
 @router.put(
-    "/{blob_id}",
+    "/{mailbox_id}",
     status_code=status.HTTP_201_CREATED,
-    summary="Store new blob",
-    description="Endpoint to store a new blob by id",
+    summary="Store new mailbox",
+    description="Endpoint to store a new mailbox by id",
     response_model=Response,
     responses={
         status.HTTP_201_CREATED: {
             "model": Response,
-            "description": "Blob stored",
+            "description": "Mailbox stored",
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
@@ -71,13 +71,13 @@ async def get_blob(
         },
     },
 )
-async def store_blob(
-        blob_id: str,
-        payload: BlobStore,
+async def store_mailbox(
+        mailbox_id: str,
+        payload: MailboxStore,
         db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> Response:
-    success = await service.store_blob(
-        db, blob_id, payload.content, payload.token
+    success = await service.store_mailbox(
+        db, mailbox_id, payload.content, payload.token
     )
 
     if not success:
@@ -89,14 +89,14 @@ async def store_blob(
 
 
 @router.delete(
-    "/{blob_id}",
-    summary="Delete a blob",
-    description="Endpoint to delete a blob",
+    "/{mailbox_id}",
+    summary="Delete a mailbox",
+    description="Endpoint to delete a mailbox",
     response_model=Response,
     responses={
         status.HTTP_200_OK: {
             "model": Response,
-            "description": "Blob deleted",
+            "description": "Mailbox deleted",
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": BadRequest,
@@ -104,8 +104,8 @@ async def store_blob(
         },
     },
 )
-async def delete_blob(
-        blob_id: str,
+async def delete_mailbox(
+        mailbox_id: str,
         x_ownership_token: str = Header(
             ...,
             alias="X-Ownership-Token",
@@ -113,7 +113,7 @@ async def delete_blob(
         ),
         db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> Response:
-    success = await service.delete_blob(db, blob_id, x_ownership_token)
+    success = await service.delete_mailbox(db, mailbox_id, x_ownership_token)
 
     if not success:
         raise HTTPException(

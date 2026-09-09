@@ -5,11 +5,11 @@ from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorDatabase
 from pymongo import WriteConcern
 from pymongo.errors import DuplicateKeyError
 
-COLLECTION_NAME = "blobs"
+COLLECTION_NAME = "mailboxes"
 
 """Schema:
 {
-    "blob_id": str,
+    "mailbox_id": str,
     "content": str,
     "created_at": datetime,
 }
@@ -20,13 +20,13 @@ def _collection(db: AsyncIOMotorDatabase) -> AsyncIOMotorCollection:
     return db[COLLECTION_NAME]
 
 
-async def get_blob(
+async def get_mailbox(
         db: AsyncIOMotorDatabase,
-        blob_id: str,
+        mailbox_id: str,
         token: str
 ) -> str | None:
     result = await _collection(db).find_one(
-        {"blob_id": blob_id},
+        {"mailbox_id": mailbox_id},
         projection={"content": 1, "token": 1, "_id": 0},
     )
     if not result:
@@ -39,9 +39,9 @@ async def get_blob(
     return result["content"]
 
 
-async def store_blob(
+async def store_mailbox(
         db: AsyncIOMotorDatabase,
-        blob_id: str,
+        mailbox_id: str,
         content: str,
         token: str
 ) -> bool:
@@ -51,7 +51,7 @@ async def store_blob(
         )
         result = await collection.insert_one(
             {
-                "blob_id": blob_id,
+                "mailbox_id": mailbox_id,
                 "content": content,
                 "token": token,
                 "created_at": datetime.now(timezone.utc),
@@ -62,13 +62,13 @@ async def store_blob(
         return False
 
 
-async def delete_blob(
+async def delete_mailbox(
         db: AsyncIOMotorDatabase,
-        blob_id: str,
+        mailbox_id: str,
         token: str
 ) -> bool:
     result = await _collection(db).find_one(
-        {"blob_id": blob_id},
+        {"mailbox_id": mailbox_id},
         projection={"token": 1, "_id": 0},
     )
     if not result:
@@ -78,5 +78,5 @@ async def delete_blob(
     if not secrets.compare_digest(stored_token, token):
         return False
 
-    delete_result = await _collection(db).delete_one({"blob_id": blob_id})
+    delete_result = await _collection(db).delete_one({"mailbox_id": mailbox_id})
     return delete_result.deleted_count == 1

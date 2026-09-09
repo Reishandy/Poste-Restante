@@ -56,7 +56,7 @@ def test_decode_bhttp_request_known_length():
     # Construct binary request: framing(0), method, scheme, authority, path, headers, body
     out = io.BytesIO()
     out.write(encode_varint(0))  # Request framing indicator
-    for field in (b"POST", b"https", b"mailbox.local", b"/blob/msg-123"):
+    for field in (b"POST", b"https", b"mailbox.local", b"/mailbox/msg-123"):
         out.write(encode_varint(len(field)) + field)
 
     # Headers: Content-Type and X-Custom
@@ -74,7 +74,7 @@ def test_decode_bhttp_request_known_length():
     assert parsed.method == "POST"
     assert parsed.scheme == "https"
     assert parsed.authority == "mailbox.local"
-    assert parsed.path == "/blob/msg-123"
+    assert parsed.path == "/mailbox/msg-123"
     assert parsed.headers["content-type"] == "application/json"
     assert parsed.headers["x-ownership-token"] == "secret-token"
     assert parsed.body == body

@@ -85,17 +85,17 @@ def _decapsulate_ohttp_response(enc_resp: bytes, sender_ctx, enc: bytes) -> byte
     return cipher.decrypt(aead_nonce, ct, b"")
 
 
-async def test_ohttp_gateway_full_blob_lifecycle(external_client, test_app):
+async def test_ohttp_gateway_full_mailbox_lifecycle(external_client, test_app):
     """End-to-end: client encapsulates PUT, GET, DELETE through /ohttp[cite: 1]."""
     pub_key = test_app.state.hpke_public_key
-    blob_id = "ohttp-blob-001"
+    mailbox_id = "ohttp-mailbox-001"
     token = "owner-token-secret"
     content = "encapsulated-durable-data"
 
     put_body = json.dumps({"content": content, "token": token}).encode()
     bhttp_put = _build_bhttp_request(
         method="PUT",
-        path=f"/blob/{blob_id}",
+        path=f"/mailbox/{mailbox_id}",
         headers={"content-type": "application/json"},
         body=put_body,
     )
@@ -116,7 +116,7 @@ async def test_ohttp_gateway_full_blob_lifecycle(external_client, test_app):
 
     bhttp_get = _build_bhttp_request(
         method="GET",
-        path=f"/blob/{blob_id}",
+        path=f"/mailbox/{mailbox_id}",
         headers={"x-ownership-token": token},
     )
     enc_req, sender_ctx, enc = _encapsulate_ohttp_request(bhttp_get, pub_key)
@@ -135,7 +135,7 @@ async def test_ohttp_gateway_full_blob_lifecycle(external_client, test_app):
 
     bhttp_del = _build_bhttp_request(
         method="DELETE",
-        path=f"/blob/{blob_id}",
+        path=f"/mailbox/{mailbox_id}",
         headers={"x-ownership-token": token},
     )
     enc_req, sender_ctx, enc = _encapsulate_ohttp_request(bhttp_del, pub_key)
@@ -172,7 +172,7 @@ async def test_ohttp_gateway_propagates_inner_client_errors(
 
     bhttp_get = _build_bhttp_request(
         method="GET",
-        path="/blob/non-existent-blob",
+        path="/mailbox/non-existent-mailbox",
         headers={"x-ownership-token": "any-token"},
     )
     enc_req, sender_ctx, enc = _encapsulate_ohttp_request(bhttp_get, pub_key)

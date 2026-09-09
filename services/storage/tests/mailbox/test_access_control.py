@@ -6,19 +6,19 @@ from starlette import status
 @pytest.mark.parametrize(
     "method, path, kwargs",
     [
-        ("GET", "/blob/sample-id", {"headers": {"X-Ownership-Token": "token"}}),
+        ("GET", "/mailbox/sample-id", {"headers": {"X-Ownership-Token": "token"}}),
         (
                 "PUT",
-                "/blob/sample-id",
+                "/mailbox/sample-id",
                 {"json": {"content": "payload", "token": "token"}},
         ),
-        ("DELETE", "/blob/sample-id", {"headers": {"X-Ownership-Token": "token"}}),
+        ("DELETE", "/mailbox/sample-id", {"headers": {"X-Ownership-Token": "token"}}),
     ],
 )
-async def test_direct_blob_requests_without_header_return_403(
+async def test_direct_mailbox_requests_without_header_return_403(
         external_client, method: str, path: str, kwargs: dict
 ):
-    """Verify any direct HTTP call to /blob routes is blocked."""
+    """Verify any direct HTTP call to /mailbox routes is blocked."""
     response = await external_client.request(method, path, **kwargs)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -35,7 +35,7 @@ async def test_spoofed_internal_dispatch_header_returns_403(test_app):
             headers={"X-Internal-Dispatch": "invalid-or-spoofed-token"},
     ) as client:
         response = await client.get(
-            "/blob/sample-id",
+            "/mailbox/sample-id",
             headers={"X-Ownership-Token": "token"},
         )
 
@@ -46,7 +46,7 @@ async def test_spoofed_internal_dispatch_header_returns_403(test_app):
 
 
 async def test_public_endpoints_unaffected(external_client):
-    """Verify non-blob endpoints (like the health check) remain open to external calls."""
+    """Verify non-mailbox endpoints (like the health check) remain open to external calls."""
     response = await external_client.get("/")
 
     assert response.status_code == status.HTTP_200_OK
