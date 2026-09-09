@@ -30,11 +30,9 @@ def decapsulate_request(
     enc = enc_request[7:39]
     ct = enc_request[39:]
 
-    # info = "message/bhttp request" || 0x00 || hdr
     info = b"message/bhttp request\x00" + enc_request[:7]
     recipient_ctx = SUITE.create_recipient_context(enc, private_key, info=info)
     bhttp_bytes = recipient_ctx.open(ct)
-
     return bhttp_bytes, recipient_ctx, enc
 
 
@@ -54,10 +52,8 @@ def encapsulate_response(
 
     salt = enc + response_nonce
     prk = SUITE.kdf.extract(salt, secret)
-    aead_key = SUITE.kdf.expand(prk, b"key", nk)
-    aead_nonce = SUITE.kdf.expand(prk, b"nonce", nn)
+    aead_key = SUITE.kdf.expand(prk, b"message/bhttp response\x00key", nk)
+    aead_nonce = SUITE.kdf.expand(prk, b"message/bhttp response\x00nonce", nn)
 
-    key_obj = SUITE.aead.import_key(aead_key)
-    ct = key_obj.seal(bhttp_response, nonce=aead_nonce, aad=b"")
-
+    ct = SUITE.aead.seal(aead_key, aead_nonce, b"", bhttp_response)
     return response_nonce + ct
