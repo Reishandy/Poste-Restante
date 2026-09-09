@@ -15,7 +15,8 @@ async def test_health_check_operational(client):
 
     assert response.status_code == status.HTTP_200_OK
     payload = response.json()
-    assert payload["service"] == settings.APP_NAME
+    assert payload["app"] == settings.APP_NAME
+    assert payload["service"] == "storage"
     assert payload["database"] == "ok"
     assert payload["detail"] == "ok"
 

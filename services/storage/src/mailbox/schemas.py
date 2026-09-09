@@ -2,23 +2,23 @@ from pydantic import BaseModel, Field
 from src.schemas import Response
 
 
-class BlobStore(BaseModel):
+class MailboxStore(BaseModel):
     content: str = Field(
         ...,
-        description="The content of the blob.",
+        description="The content of the mailbox.",
         examples=["U2FsdGVkX1+osqDU1dTNDbhqegX2r9yTFIqY1oCywhI="],
     )
     token: str = Field(
         ...,
-        description="Ownership token required to retrieve or delete this blob.",
+        description="Ownership token required to retrieve or delete this mailbox.",
         examples=["U2FsdGVkX186lfm0PXLFVg4fg7kQL3fY4eOmRgluwPBwQhg7GvuXxSwrtXHg9feD"],
     )
 
 
-class BlobResponse(Response):
+class MailboxResponse(Response):
     content: str = Field(
         ...,
-        description="The content of the blob.",
+        description="The content of the mailbox.",
         examples=["U2FsdGVkX1+osqDU1dTNDbhqegX2r9yTFIqY1oCywhI="],
     )
 
