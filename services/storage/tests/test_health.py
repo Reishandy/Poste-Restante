@@ -5,7 +5,7 @@ from starlette import status
 
 from src.config import settings
 from src.database import get_database
-from src.hpke.keys import SUITE
+from src.ohttp.keys import SUITE
 from src.main import app
 
 

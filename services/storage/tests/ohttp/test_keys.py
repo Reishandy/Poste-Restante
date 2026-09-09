@@ -4,7 +4,7 @@ import stat
 import pytest
 
 from src.config import settings
-from src.hpke.keys import SUITE, load_or_generate_node_keys
+from src.ohttp.keys import SUITE, load_or_generate_node_keys
 
 
 @pytest.fixture(autouse=True)

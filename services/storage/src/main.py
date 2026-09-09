@@ -11,7 +11,8 @@ from starlette.responses import JSONResponse, Response
 from src.blob.router import router as blob_router
 from src.config import settings
 from src.database import database, get_database
-from src.hpke.keys import SUITE, load_or_generate_node_keys
+from src.ohttp.keys import SUITE, load_or_generate_node_keys
+from src.ohttp.router import router as ohttp_router
 from src.schemas import ErrorResponse, HealthCheckResponse, HealthCheckSuccessResponse, HealthCheckDegradedResponse
 
 
@@ -104,3 +105,4 @@ async def health_check_endpoint(
 
 
 app.include_router(blob_router)
+app.include_router(ohttp_router)
