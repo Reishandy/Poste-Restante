@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from starlette import status
 
-from src.mailbox import service
-from src.mailbox.dependency import verify_internal_dispatch
-from src.mailbox.schemas import BadRequest, MailboxResponse, MailboxStore
 from src.database import get_database
+from src.mailbox import service
+from src.mailbox.dependenies import verify_internal_dispatch, verify_pow
+from src.mailbox.schemas import BadRequest, MailboxResponse, MailboxStore
 from src.schemas import Response
 
 router = APIRouter(
@@ -60,6 +60,7 @@ async def get_mailbox(
     summary="Store new mailbox",
     description="Endpoint to store a new mailbox by id",
     response_model=Response,
+    dependencies=[Depends(verify_pow)],
     responses={
         status.HTTP_201_CREATED: {
             "model": Response,

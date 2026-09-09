@@ -4,6 +4,7 @@ import struct
 
 from starlette import status
 
+from src.mailbox.dependenies import solve_pow
 from src.ohttp.bhttp import decode_varint, encode_varint
 from src.ohttp.crypto import OHTTP_KEY_ID, _get_aead_cipher
 from src.ohttp.keys import SUITE
@@ -86,17 +87,21 @@ def _decapsulate_ohttp_response(enc_resp: bytes, sender_ctx, enc: bytes) -> byte
 
 
 async def test_ohttp_gateway_full_mailbox_lifecycle(external_client, test_app):
-    """End-to-end: client encapsulates PUT, GET, DELETE through /ohttp[cite: 1]."""
+    """End-to-end: client encapsulates PUT, GET, DELETE through /ohttp."""
     pub_key = test_app.state.hpke_public_key
     mailbox_id = "ohttp-mailbox-001"
     token = "owner-token-secret"
     content = "encapsulated-durable-data"
+    nonce = solve_pow(mailbox_id)
 
     put_body = json.dumps({"content": content, "token": token}).encode()
     bhttp_put = _build_bhttp_request(
         method="PUT",
         path=f"/mailbox/{mailbox_id}",
-        headers={"content-type": "application/json"},
+        headers={
+            "content-type": "application/json",
+            "x-pow-nonce": nonce,  # <--- Added to encapsulated BHTTP request
+        },
         body=put_body,
     )
     enc_req, sender_ctx, enc = _encapsulate_ohttp_request(bhttp_put, pub_key)
