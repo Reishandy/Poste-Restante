@@ -1,0 +1,12 @@
+name: poste-restante
+
+services:
+  relay:
+    build: .
+    restart: unless-stopped
+    environment:
+      APP_NAME: ${APP_NAME:-poste-restante-relay}
+      DEV_MODE: ${DEV_MODE:-false}
+      TARGET_GATEWAY_URL: ${TARGET_GATEWAY_URL:-http://storage:8000/ohttp}
+    ports:
+      - "${APP_PORT:-8000}:8000"
