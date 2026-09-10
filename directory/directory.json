@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "generated_at": "2026-09-10T03:42:45Z",
+  "nodes": [
+    {
+      "hostname": "poste-restante-storage1.reishandy.id",
+      "role": "storage",
+      "public_key": "tD4uP4ts6EEwfo9Nz0cXrK8AfiZ/6yj7aDSMFDIIvDw="
+    },
+    {
+      "hostname": "poste-restante-storage2.reishandy.id",
+      "role": "storage",
+      "public_key": "Guh1blDanU4rtKT5aWUw/Ks5rDUd64f7NpE2NbZpbXA="
+    },
+    {
+      "hostname": "poste-restante-storage3.reishandy.id",
+      "role": "storage",
+      "public_key": "L3VJ3uuZ1OJmgqAxS0VUkaFnDgJf26tkkw59reTUIV8="
+    },
+    {
+      "hostname": "poste-restante-relay1.reishandy.id",
+      "role": "relay"
+    },
+    {
+      "hostname": "poste-restante-relay2.reishandy.id",
+      "role": "relay"
+    },
+    {
+      "hostname": "poste-restante-relay3.reishandy.id",
+      "role": "relay"
+    }
+  ]
+}

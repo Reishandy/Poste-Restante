@@ -1,0 +1,6 @@
+poste-restante-storage1.reishandy.id
+poste-restante-storage2.reishandy.id
+poste-restante-storage3.reishandy.id
+poste-restante-relay1.reishandy.id
+poste-restante-relay2.reishandy.id
+poste-restante-relay3.reishandy.id
