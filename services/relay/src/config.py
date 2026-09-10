@@ -20,7 +20,7 @@ class Config(BaseSettings):
     )
 
     RATE_LIMIT_REQUESTS: int = Field(
-        60,
+        150,
         description="Maximum requests permitted per IP within the window",
     )
     RATE_LIMIT_WINDOW_SECONDS: int = Field(
