@@ -1,5 +1,5 @@
 //
-//  CryptoStoragError.swift
+//  CryptoStorageError.swift
 //  PosteRestante
 //
 //  Created by Muhammad Akbar Reishandy on 11/09/26.
@@ -7,12 +7,13 @@
 
 import Foundation
 
-public enum CryptoStoragError: Error, LocalizedError, Equatable {
+public enum CryptoStorageError: Error, LocalizedError, Equatable {
 	case keychainOperationFailed(status: OSStatus)
 	case encryptionFailed
 	case decryptionFailed
 	case deviceLocked
 	case invalidKeySize(expected: Int, actual: Int)
+	case invalidKeychainData
 	
 	public var errorDescription: String? {
 		switch self {
@@ -26,6 +27,8 @@ public enum CryptoStoragError: Error, LocalizedError, Equatable {
 			return "Protected data is unavailable while the device is locked."
 		case .invalidKeySize(let expected, let actual):
 			return "Invalid key size. Expected \(expected) bytes, got \(actual) bytes."
+		case .invalidKeychainData:
+			return "Keychain item could not be decoded into valid key data."
 		}
 	}
 }

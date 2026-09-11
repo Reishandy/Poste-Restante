@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		8BF59B5E3053B1D1001CD970 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8BF599E13052790E001CD970 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8BF599E83052790E001CD970;
+			remoteInfo = PosteRestante;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		8BF599E93052790E001CD970 /* PosteRestante.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PosteRestante.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BF59B5A3053B1D1001CD970 /* PosteRestanteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PosteRestanteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = PosteRestante;
 			sourceTree = "<group>";
 		};
+		8BF59B5B3053B1D1001CD970 /* PosteRestanteTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PosteRestanteTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8BF599E63052790E001CD970 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8BF59B573053B1D1001CD970 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				8BF599EB3052790E001CD970 /* PosteRestante */,
+				8BF59B5B3053B1D1001CD970 /* PosteRestanteTests */,
 				8BF599EA3052790E001CD970 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				8BF599E93052790E001CD970 /* PosteRestante.app */,
+				8BF59B5A3053B1D1001CD970 /* PosteRestanteTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = 8BF599E93052790E001CD970 /* PosteRestante.app */;
 			productType = "com.apple.product-type.application";
 		};
+		8BF59B593053B1D1001CD970 /* PosteRestanteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8BF59B603053B1D1001CD970 /* Build configuration list for PBXNativeTarget "PosteRestanteTests" */;
+			buildPhases = (
+				8BF59B563053B1D1001CD970 /* Sources */,
+				8BF59B573053B1D1001CD970 /* Frameworks */,
+				8BF59B583053B1D1001CD970 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8BF59B5F3053B1D1001CD970 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				8BF59B5B3053B1D1001CD970 /* PosteRestanteTests */,
+			);
+			name = PosteRestanteTests;
+			packageProductDependencies = (
+			);
+			productName = PosteRestanteTests;
+			productReference = 8BF59B5A3053B1D1001CD970 /* PosteRestanteTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +130,11 @@
 				TargetAttributes = {
 					8BF599E83052790E001CD970 = {
 						CreatedOnToolsVersion = 26.6;
+					};
+					8BF59B593053B1D1001CD970 = {
+						CreatedOnToolsVersion = 26.6;
+						LastSwiftMigration = 2660;
+						TestTargetID = 8BF599E83052790E001CD970;
 					};
 				};
 			};
@@ -100,12 +153,20 @@
 			projectRoot = "";
 			targets = (
 				8BF599E83052790E001CD970 /* PosteRestante */,
+				8BF59B593053B1D1001CD970 /* PosteRestanteTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8BF599E73052790E001CD970 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8BF59B583053B1D1001CD970 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +183,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8BF59B563053B1D1001CD970 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8BF59B5F3053B1D1001CD970 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8BF599E83052790E001CD970 /* PosteRestante */;
+			targetProxy = 8BF59B5E3053B1D1001CD970 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		8BF599F23052790F001CD970 /* Debug */ = {
@@ -322,6 +398,61 @@
 			};
 			name = Release;
 		};
+		8BF59B613053B1D1001CD970 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6H8PJSZGXA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = id.reishandy.PosteRestanteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PosteRestante.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PosteRestante";
+			};
+			name = Debug;
+		};
+		8BF59B623053B1D1001CD970 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6H8PJSZGXA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = id.reishandy.PosteRestanteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PosteRestante.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PosteRestante";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -339,6 +470,15 @@
 			buildConfigurations = (
 				8BF599F53052790F001CD970 /* Debug */,
 				8BF599F63052790F001CD970 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8BF59B603053B1D1001CD970 /* Build configuration list for PBXNativeTarget "PosteRestanteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8BF59B613053B1D1001CD970 /* Debug */,
+				8BF59B623053B1D1001CD970 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

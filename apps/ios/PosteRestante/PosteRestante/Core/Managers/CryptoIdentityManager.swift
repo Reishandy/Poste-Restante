@@ -1,24 +1,21 @@
-//
-//  CryptoIdentityManager.swift
-//  PosteRestante
-//
-//  Created by Muhammad Akbar Reishandy on 11/09/26.
-//
-
 import Foundation
 import CryptoKit
 import Security
 
-public struct CryptoIdentityManager: Sendable {
+public actor CryptoIdentityManager {
 	public static let shared = CryptoIdentityManager()
 	
 	private static let protocolSalt = Data("PosteRestante-v1-Handshake-Salt".utf8)
 	private static let contextPrefix = Data("PosteRestante-v1-MasterSecret".utf8)
 	
-	private let service = "id.reishandy.PosteRestante.identity"
+	private let service: String
 	private let account: String
 	
-	public init(account: String = "x25519-device") {
+	public init(
+		service: String = "id.reishandy.PosteRestante.identity",
+		account: String = "x25519-device"
+	) {
+		self.service = service
 		self.account = account
 	}
 	
@@ -53,7 +50,7 @@ public struct CryptoIdentityManager: Sendable {
 		}
 	}
 	
-	// MARK: Key Exchange
+	// MARK: - Key Exchange
 	
 	/// Performs X25519 ECDH and derives a single 256-bit symmetric master secret via HKDF-SHA256.
 	/// Binds lexicographically sorted public keys in HKDF context info.
@@ -66,8 +63,12 @@ public struct CryptoIdentityManager: Sendable {
 		
 		let myPrivateKey = try getOrCreatePrivateKey()
 		let myPublicKeyBytes = myPrivateKey.publicKey.rawRepresentation
-		let peerPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: peerPublicKeyBytes)
 		
+		guard peerPublicKeyBytes != myPublicKeyBytes else {
+			throw CryptoIdentityError.selfHandshakeNotPermitted
+		}
+		
+		let peerPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: peerPublicKeyBytes)
 		let sharedSecret = try myPrivateKey.sharedSecretFromKeyAgreement(with: peerPublicKey)
 		
 		// Deterministic public-key sorting for symmetric context binding
@@ -85,7 +86,7 @@ public struct CryptoIdentityManager: Sendable {
 		)
 	}
 	
-	// MARK: - Helpers
+	// MARK: - Private Helpers
 	
 	private func savePrivateKey(_ key: Curve25519.KeyAgreement.PrivateKey) throws {
 		let query: [String: Any] = [
@@ -120,7 +121,7 @@ public struct CryptoIdentityManager: Sendable {
 		switch status {
 		case errSecSuccess:
 			guard let data = item as? Data else {
-				throw CryptoIdentityError.keyDerivationFailed
+				throw CryptoIdentityError.invalidKeychainData
 			}
 			guard data.count == 32 else {
 				throw CryptoIdentityError.invalidKeySize(expected: 32, actual: data.count)

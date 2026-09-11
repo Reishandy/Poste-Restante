@@ -1,5 +1,5 @@
 //
-//  CryptoKeyManager.swift
+//  CryptoStorageManager.swift
 //  PosteRestante
 //
 //  Created by Muhammad Akbar Reishandy on 11/09/26.
@@ -7,23 +7,29 @@
 
 import Foundation
 import CryptoKit
+import Security
+#if canImport(UIKit)
 import UIKit
+#endif
 
-public final class CryptoKeyManager: Sendable {
-	public static let shared = CryptoKeyManager()
+public final class CryptoStorageManager: @unchecked Sendable {
+	public static let shared = CryptoStorageManager()
 	
-	private let service = "id.reishandy.PosteRestante.identity"
+	private let service: String
 	private let account: String
 	
-	// In-memory hot-path cache protected by lock
 	private var cachedKey: SymmetricKey?
 	private let lock = NSLock()
-	private var observerToken: NSObjectProtocol?
+	private var observerToken: (any NSObjectProtocol)?
 	
-	public init(account: String = "aes256-device") {
+	public init(
+		service: String = "id.reishandy.PosteRestante.storage",
+		account: String = "aes256-device"
+	) {
+		self.service = service
 		self.account = account
 		
-		// Auto-eviction: wipe the 256-bit symmetric key from RAM immediately when screen locks
+#if canImport(UIKit)
 		self.observerToken = NotificationCenter.default.addObserver(
 			forName: UIApplication.protectedDataWillBecomeUnavailableNotification,
 			object: nil,
@@ -31,6 +37,15 @@ public final class CryptoKeyManager: Sendable {
 		) { [weak self] _ in
 			self?.purgeMemoryCache()
 		}
+#endif
+	}
+	
+	deinit {
+#if canImport(UIKit)
+		if let observerToken {
+			NotificationCenter.default.removeObserver(observerToken)
+		}
+#endif
 	}
 	
 	// MARK: - Key Lifecycle
@@ -65,7 +80,7 @@ public final class CryptoKeyManager: Sendable {
 		return newKey
 	}
 	
-	/// Deletes the master key from the Keychain.
+	/// Deletes the master key from the Keychain and purges the in-memory cache.
 	public func deleteStorageKey() throws {
 		lock.lock()
 		defer { lock.unlock() }
@@ -80,11 +95,11 @@ public final class CryptoKeyManager: Sendable {
 		
 		let status = SecItemDelete(query as CFDictionary)
 		guard status == errSecSuccess || status == errSecItemNotFound else {
-			throw CryptoStoragError.keychainOperationFailed(status: status)
+			throw CryptoStorageError.keychainOperationFailed(status: status)
 		}
 	}
 	
-	// MARK: - Functionality
+	// MARK: - Encryption / Decryption
 	
 	/// Encrypts plaintext into a combined AES-GCM container: 12-byte Nonce || Ciphertext || 16-byte Tag
 	public func encrypt(_ plaintext: Data) throws -> Data {
@@ -92,11 +107,11 @@ public final class CryptoKeyManager: Sendable {
 		do {
 			let sealedBox = try AES.GCM.seal(plaintext, using: key)
 			guard let combined = sealedBox.combined else {
-				throw CryptoStoragError.encryptionFailed
+				throw CryptoStorageError.encryptionFailed
 			}
 			return combined
-		} catch where !(error is CryptoStoragError) {
-			throw CryptoStoragError.encryptionFailed
+		} catch {
+			throw CryptoStorageError.encryptionFailed
 		}
 	}
 	
@@ -107,11 +122,11 @@ public final class CryptoKeyManager: Sendable {
 			let sealedBox = try AES.GCM.SealedBox(combined: combinedPayload)
 			return try AES.GCM.open(sealedBox, using: key)
 		} catch {
-			throw CryptoStoragError.decryptionFailed
+			throw CryptoStorageError.decryptionFailed
 		}
 	}
 	
-	// MARK: - Helpers
+	// MARK: - Private Helpers
 	
 	private func saveKeyDataToKeychain(_ data: Data) throws {
 		let query: [String: Any] = [
@@ -126,7 +141,7 @@ public final class CryptoKeyManager: Sendable {
 		
 		let status = SecItemAdd(query as CFDictionary, nil)
 		guard status == errSecSuccess else {
-			throw CryptoStoragError.keychainOperationFailed(status: status)
+			throw CryptoStorageError.keychainOperationFailed(status: status)
 		}
 	}
 	
@@ -145,19 +160,18 @@ public final class CryptoKeyManager: Sendable {
 		switch status {
 		case errSecSuccess:
 			guard let data = item as? Data else {
-				throw CryptoStoragError.decryptionFailed
+				throw CryptoStorageError.invalidKeychainData
 			}
 			guard data.count == 32 else {
-				throw CryptoStoragError.invalidKeySize(expected: 32, actual: data.count)
+				throw CryptoStorageError.invalidKeySize(expected: 32, actual: data.count)
 			}
 			return data
 		case errSecItemNotFound:
 			return nil
 		case errSecInteractionNotAllowed:
-			// Thrown when trying to access WhenUnlocked items while device is locked
-			throw CryptoStoragError.deviceLocked
+			throw CryptoStorageError.deviceLocked
 		default:
-			throw CryptoStoragError.keychainOperationFailed(status: status)
+			throw CryptoStorageError.keychainOperationFailed(status: status)
 		}
 	}
 }
